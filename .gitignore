@@ -1,8 +1,12 @@
 .env
-.venv
+.venv/
+.books/
+.images/
 bs4_tutorial.py
 
 venv/
+books/
+images/
 *.pyc
 __pycache__/
 *.pyo
