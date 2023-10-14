@@ -1,5 +1,6 @@
 .env
-test.py
+.venv
+bs4_tutorial.py
 
 venv/
 *.pyc
