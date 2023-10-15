@@ -26,13 +26,17 @@ def get_book_info(book_url, url):
     comments_elements = soup.find('div', id="content").find_all('span', class_='black')
     comments = [comment.text for comment in comments_elements]
 
-    return title, image_link, comments
+    genre_elements = soup.find('div', id="content").find('span', class_='d_book').find_all('a')
+    genres = [genre.text for genre in genre_elements]
+
+    print(f"Заголовок:{title}\nЖанр:{genres}")
+
+    return title, image_link, comments, genres
 
 
 def download_txt(response, title, comments, path, book_id):
     sanitized_title = sanitize_filename(title)
     filename = f"{book_id}.{sanitized_title}.txt"
-    print(comments)
     with open(os.path.join(path, filename), 'w', encoding='utf-8') as file:
         for comment in comments:
             file.write(comment + '\n\n')
@@ -76,9 +80,10 @@ def main(start_id=1, end_id=11):
             print(f"Error occurred for book {book_id}: {e}")
             continue
 
-        title, image_link, comments = get_book_info(book_url, url)
-        download_txt(response, title, comments, path, book_id)
-        download_image(image_link, img_path, book_id)
+        title, image_link, comments, genres = get_book_info(book_url, url)
+        if 'Деловая литература' in genres:
+            download_txt(response, title, comments, path, book_id)
+            download_image(image_link, img_path, book_id)
 
 
 if __name__ == "__main__":
