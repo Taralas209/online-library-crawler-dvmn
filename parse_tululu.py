@@ -1,5 +1,6 @@
 import os
 import requests
+import argparse
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 from requests.exceptions import HTTPError
@@ -87,4 +88,10 @@ def main(start_id=1, end_id=11):
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Download books from tululu.org")
+    parser.add_argument("--start_id", type=int, default=1, help="ID of the first book to download")
+    parser.add_argument("--end_id", type=int, default=11, help="ID of the last book to download")
+
+    args = parser.parse_args()
+
+    main(args.start_id, args.end_id)
