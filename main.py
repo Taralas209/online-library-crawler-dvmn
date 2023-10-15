@@ -12,7 +12,7 @@ def check_for_redirect(response, book_url):
         raise HTTPError(f"Redirection occurred from {book_url} to {response.url}")
 
 
-def get_book_info(book_url, url):
+def parse_book_page(book_url, url):
     response = requests.get(book_url)
     response.raise_for_status()
     soup = BeautifulSoup(response.text, 'lxml')
@@ -80,8 +80,8 @@ def main(start_id=1, end_id=11):
             print(f"Error occurred for book {book_id}: {e}")
             continue
 
-        title, image_link, comments, genres = get_book_info(book_url, url)
-        if 'Деловая литература' in genres:
+        title, image_link, comments, genres = parse_book_page(book_url, url)
+        if 'Научная фантастика' in genres:
             download_txt(response, title, comments, path, book_id)
             download_image(image_link, img_path, book_id)
 
