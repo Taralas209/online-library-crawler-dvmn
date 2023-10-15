@@ -30,8 +30,6 @@ def parse_book_page(book_url, url):
     genre_elements = soup.find('div', id="content").find('span', class_='d_book').find_all('a')
     genres = [genre.text for genre in genre_elements]
 
-    print(f"Заголовок:{title}\nЖанр:{genres}")
-
     return title, image_link, comments, genres
 
 
