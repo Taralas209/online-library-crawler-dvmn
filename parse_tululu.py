@@ -66,7 +66,7 @@ def main(start_id=1, end_id=11):
     if not os.path.exists(img_path):
         os.makedirs(img_path)
 
-    for book_id in range(start_id, end_id):
+    for book_id in range(start_id, end_id + 1):
         book_url = f"{url}/b{book_id}"
         book_url_to_download = f"{url}/txt.php?id={book_id}"
 
