@@ -1,4 +1,5 @@
 import os
+import time
 import requests
 import argparse
 from bs4 import BeautifulSoup
@@ -7,6 +8,9 @@ from requests.exceptions import HTTPError
 from pathvalidate import sanitize_filename
 from urllib.parse import urlsplit, unquote
 
+
+MAX_RETRIES = 5
+RETRY_DELAY = 3
 
 def check_for_redirect(response, book_url):
     if response.history:
@@ -21,13 +25,16 @@ def parse_book_page(book_url, url):
     title_tag = soup.find('h1')
     title = title_tag.text.split('::')[0].strip() if title_tag else None
 
-    img_src = soup.find(class_='bookimage').find('img')['src']
+    bookimage = soup.find(class_='bookimage')
+    img = bookimage.find('img') if bookimage else None
+    img_src = img['src'] if img else None
     image_link = urljoin(url, img_src) if img_src else None
 
-    comments_elements = soup.find('div', id="content").find_all('span', class_='black')
+    content_div = soup.find('div', id="content")
+    comments_elements = content_div.find_all('span', class_='black') if content_div else []
     comments = [comment.text for comment in comments_elements]
 
-    genre_elements = soup.find('div', id="content").find('span', class_='d_book').find_all('a')
+    genre_elements = content_div.find('span', class_='d_book').find_all('a') if content_div else []
     genres = [genre.text for genre in genre_elements]
 
     return title, image_link, comments, genres
@@ -58,7 +65,7 @@ def download_image(image_url, img_path, book_id):
 def main():
     parser = argparse.ArgumentParser(description="Download books from tululu.org")
     parser.add_argument("--start_id", type=int, default=1, help="ID of the first book to download")
-    parser.add_argument("--end_id", type=int, default=11, help="ID of the last book to download")
+    parser.add_argument("--end_id", type=int, default=10, help="ID of the last book to download")
 
     args = parser.parse_args()
 
@@ -74,14 +81,22 @@ def main():
         book_url_to_download = f"{url}/txt.php"
         book_url_to_check = f"{url}/txt.php?id={book_id}"
 
-        try:
-            response = requests.get(book_url_to_download, params={'id': book_id})
-            response.raise_for_status()
-            check_for_redirect(response, book_url_to_check)
+        retries = 0
+        while retries < MAX_RETRIES:
+            try:
+                response = requests.get(book_url_to_download, params={'id': book_id})
+                response.raise_for_status()
+                check_for_redirect(response, book_url_to_check)
+                break
 
-        except HTTPError as e:
-            print(f"Error occurred for book {book_id}: {e}")
-            continue
+            except HTTPError as e:
+                print(f"Error occurred for book {book_id}: {e}")
+                break
+
+            except requests.ConnectionError:
+                retries += 1
+                print(f"Connection error for book {book_id}. Retry {retries}/{MAX_RETRIES}...")
+                time.sleep(RETRY_DELAY)
 
         title, image_link, comments, genres = parse_book_page(book_url, url)
         if 'Научная фантастика' in genres:
