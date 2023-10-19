@@ -55,25 +55,29 @@ def download_image(image_url, img_path, book_id):
         image.write(response.content)
 
 
-def main(start_id=1, end_id=11):
+def main():
+    parser = argparse.ArgumentParser(description="Download books from tululu.org")
+    parser.add_argument("--start_id", type=int, default=1, help="ID of the first book to download")
+    parser.add_argument("--end_id", type=int, default=11, help="ID of the last book to download")
+
+    args = parser.parse_args()
+
     path = './books/'
     img_path = './images/'
     url = 'https://tululu.org'
 
-    if not os.path.exists(path):
-        os.makedirs(path)
+    os.makedirs(path, exist_ok=True)
+    os.makedirs(img_path, exist_ok=True)
 
-    if not os.path.exists(img_path):
-        os.makedirs(img_path)
-
-    for book_id in range(start_id, end_id + 1):
+    for book_id in range(args.start_id, args.end_id + 1):
         book_url = f"{url}/b{book_id}"
-        book_url_to_download = f"{url}/txt.php?id={book_id}"
+        book_url_to_download = f"{url}/txt.php"
+
 
         try:
-            response = requests.get(book_url_to_download)
+            response = requests.get(book_url_to_download, params={'id': book_id})
             response.raise_for_status()
-            check_for_redirect(response, book_url_to_download)
+            check_for_redirect(response, response.url)
 
         except HTTPError as e:
             print(f"Error occurred for book {book_id}: {e}")
@@ -86,10 +90,4 @@ def main(start_id=1, end_id=11):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Download books from tululu.org")
-    parser.add_argument("--start_id", type=int, default=1, help="ID of the first book to download")
-    parser.add_argument("--end_id", type=int, default=11, help="ID of the last book to download")
-
-    args = parser.parse_args()
-
-    main(args.start_id, args.end_id)
+        main()

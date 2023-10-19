@@ -1,7 +1,7 @@
 # Online Library Scraper
 
 ## Description
-This program is designed to download science fiction books from the tululu.org website. You can specify a range of book identifiers to download, and the program will fetch them for you.
+This program is designed to download science fiction books from the [tululu.org](https://tululu.org/) website. You can specify a range of book identifiers to download, and the program will fetch them for you.
 
 ## Installation
 1. Install Python from the [official website](https://www.python.org/downloads/).
