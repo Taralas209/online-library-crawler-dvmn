@@ -9,7 +9,7 @@ from urllib.parse import urlsplit, unquote
 
 
 def check_for_redirect(response, book_url):
-    if response.url != response.history:
+    if response.history:
         raise HTTPError(f"Redirection occurred from {book_url} to {response.url}")
 
 
@@ -72,12 +72,12 @@ def main():
     for book_id in range(args.start_id, args.end_id + 1):
         book_url = f"{url}/b{book_id}"
         book_url_to_download = f"{url}/txt.php"
-
+        book_url_to_check = f"{url}/txt.php?id={book_id}"
 
         try:
             response = requests.get(book_url_to_download, params={'id': book_id})
             response.raise_for_status()
-            check_for_redirect(response, response.url)
+            check_for_redirect(response, book_url_to_check)
 
         except HTTPError as e:
             print(f"Error occurred for book {book_id}: {e}")
