@@ -9,7 +9,7 @@ from urllib.parse import urlsplit, unquote
 
 
 def check_for_redirect(response, book_url):
-    if response.url != book_url or response.history:
+    if response.url != response.history:
         raise HTTPError(f"Redirection occurred from {book_url} to {response.url}")
 
 
