@@ -26,7 +26,7 @@ def fetch_page_content(book_url_to_fetch):
     return response.text
 
 
-def parse_book_page(page_content, url):
+def parse_book_page(page_content, book_url_to_fetch):
     soup = BeautifulSoup(page_content, 'lxml')
 
     title_tag = soup.find('h1')
@@ -35,7 +35,7 @@ def parse_book_page(page_content, url):
     bookimage = soup.find(class_='bookimage')
     img = bookimage.find('img') if bookimage else None
     img_src = img['src'] if img else None
-    image_link = urljoin(url, img_src) if img_src else None
+    image_link = urljoin(book_url_to_fetch, img_src) if img_src else None
 
     content_div = soup.find('div', id="content")
     comments_elements = content_div.find_all('span', class_='black') if content_div else []
@@ -97,7 +97,7 @@ def main():
                 check_for_redirect(response, book_url_to_check)
 
                 page_content = fetch_page_content(book_url_to_fetch)
-                title, image_link, comments, genres = parse_book_page(page_content, url)
+                title, image_link, comments, genres = parse_book_page(page_content, book_url_to_fetch)
                 if 'Научная фантастика' in genres:
                     download_txt(response, title, comments, path, book_id)
                     download_image(image_link, img_path, book_id)
